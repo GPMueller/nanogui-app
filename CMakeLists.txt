@@ -56,11 +56,12 @@ add_subdirectory( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui )
 
 #--------------------------------------------------
 #----- main target
-add_executable( ${EXECUTABLE_NAME} src/main.cpp )
+add_executable( ${EXECUTABLE_NAME}
+    src/main.cpp
+    src/application.cpp
+    src/gl_canvas.cpp )
 
-# target_include_directories( ${EXECUTABLE_NAME} PRIVATE
-#     ${CMAKE_CURRENT_LIST_DIR}/thirdparty/filesystem/include
-#     ${CMAKE_CURRENT_LIST_DIR}/thirdparty/fmt/include )
+target_include_directories( ${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include )
 
 target_link_libraries( ${EXECUTABLE_NAME} PRIVATE nanogui fmt )
 
