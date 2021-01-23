@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install required system packages 📦
+    - name: Install required system packages 📚
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt update
@@ -35,7 +35,37 @@ jobs:
     - name: Build 🛠
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --config $BUILD_TYPE -j 2
+      run: |
+        cmake --build . --config $BUILD_TYPE -j 2
+        cmake --build . --config $BUILD_TYPE -j 2 --target install
+        cmake --build . --config $BUILD_TYPE -j 2 --target package
+
+    - name: Archive ubuntu package 📦
+      if: matrix.os == 'ubuntu-latest' && matrix.build-type == 'Release'
+      uses: actions/upload-artifact@v2
+      with:
+        name: nanogui-app-ubuntu
+        path: |
+          ${{runner.workspace}}/build/*.tar.gz
+
+    - name: Archive macos package 📦
+      if: matrix.os == 'macos-latest' && matrix.build-type == 'Release'
+      uses: actions/upload-artifact@v2
+      with:
+        name: nanogui-app-macos
+        path: |
+          ${{runner.workspace}}/build/*.dmg
+          ${{runner.workspace}}/build/install/README.md
+          ${{runner.workspace}}/build/install/License.txt
+          ${{runner.workspace}}/build/install/Licenses/
+
+    - name: Archive windows package 📦
+      if: matrix.os == 'windows-latest' && matrix.build-type == 'Release'
+      uses: actions/upload-artifact@v2
+      with:
+        name: nanogui-app-windows
+        path: |
+          ${{runner.workspace}}/build/*.zip
 
   web-app:
     runs-on: ubuntu-20.04
@@ -46,13 +76,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install required system packages 📦
+    - name: Install required system packages 📚
       if: matrix.os == 'ubuntu-20.04'
       run: |
         sudo apt update
         sudo apt install xorg-dev libglu1-mesa-dev
 
-    - name: Install Emscripten 📦
+    - name: Install Emscripten 📚
       working-directory: ${{runner.workspace}}
       run: |
         git clone https://github.com/emscripten-core/emsdk.git
@@ -76,6 +106,12 @@ jobs:
       run: |
         source ${{runner.workspace}}/emsdk/emsdk_env.sh
         cmake --build . --config $BUILD_TYPE -j 2
+
+    - name: Archive web app 📦
+      uses: actions/upload-artifact@v2
+      with:
+        name: nanogui-app-web
+        path: webapp/
 
     - name: Deploy 🚀
       if: github.event_name != 'pull_request'
