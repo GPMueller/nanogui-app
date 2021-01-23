@@ -55,39 +55,6 @@ add_subdirectory( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui )
 
 
 #--------------------------------------------------
-#----- Native file dialog library
-set( NFD_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nativefiledialog/src )
-
-add_library( nativefiledialog STATIC ${NFD_SRC_DIR}/nfd_common.c )
-target_include_directories( nativefiledialog PUBLIC ${NFD_SRC_DIR}/include )
-
-if( APPLE )
-    target_sources( nativefiledialog PRIVATE ${NFD_SRC_DIR}/nfd_cocoa.m )
-elseif( WIN32 )
-    target_sources( nativefiledialog PRIVATE ${NFD_SRC_DIR}/nfd_win.cpp )
-elseif( APP_TARGET_WEB )
-    target_sources( nativefiledialog PRIVATE ${NFD_SRC_DIR}/nfd_emscripten.cpp )
-elseif( UNIX )
-    target_sources( nativefiledialog PRIVATE ${NFD_SRC_DIR}/nfd_gtk.c )
-
-    # Use the package PkgConfig to detect GTK+ headers/library files
-    FIND_PACKAGE( PkgConfig REQUIRED )
-    PKG_CHECK_MODULES( GTK REQUIRED gtk+-3.0 )
-
-    # Setup CMake to use GTK+, tell the compiler where to look for headers
-    # and the linker where to look for libraries
-    target_include_directories( nativefiledialog PUBLIC ${GTK_INCLUDE_DIRS} )
-    target_link_directories( nativefiledialog PUBLIC ${GTK_LIBRARY_DIRS} )
-
-    # Add other flags to the compiler
-    add_definitions( ${GTK_CFLAGS_OTHER} )
-
-    # Link the target to the GTK+ libraries
-    target_link_libraries( nativefiledialog ${GTK_LIBRARIES} )
-endif()
-
-
-#--------------------------------------------------
 #----- main target
 add_executable( ${EXECUTABLE_NAME} src/main.cpp )
 
