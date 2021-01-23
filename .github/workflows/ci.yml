@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install required system packages
+    - name: Install required system packages 📦
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt update
@@ -27,12 +27,12 @@ jobs:
     - name: Create build folder
       run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - name: configure
+    - name: Configure ⚙
       shell: bash
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-    - name: build
+    - name: Build 🛠
       shell: bash
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --config $BUILD_TYPE -j 2
@@ -46,13 +46,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install required system packages
+    - name: Install required system packages 📦
       if: matrix.os == 'ubuntu-20.04'
       run: |
         sudo apt update
         sudo apt install xorg-dev libglu1-mesa-dev
 
-    - name: Install Emscripten
+    - name: Install Emscripten 📦
       working-directory: ${{runner.workspace}}
       run: |
         git clone https://github.com/emscripten-core/emsdk.git
@@ -63,21 +63,21 @@ jobs:
     - name: Create build folder
       run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - name: configure
+    - name: Configure ⚙
       shell: bash
       working-directory: ${{runner.workspace}}/build
       run: |
         source ${{runner.workspace}}/emsdk/emsdk_env.sh
         cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
-    - name: build
+    - name: Build 🛠
       shell: bash
       working-directory: ${{runner.workspace}}/build
       run: |
         source ${{runner.workspace}}/emsdk/emsdk_env.sh
         cmake --build . --config $BUILD_TYPE -j 2
 
-    - name: deploy 🚀
+    - name: Deploy 🚀
       if: github.event_name != 'pull_request'
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
