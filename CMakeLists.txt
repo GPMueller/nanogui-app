@@ -90,13 +90,12 @@ endif()
 
 #--------------------------------------------------
 #----- fmtlib
-
 add_subdirectory( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/fmt )
+#--------------------------------------------------
 
 
 #--------------------------------------------------
 #----- nanogui
-
 set( NANOGUI_BUILD_EXAMPLES OFF )
 set( NANOGUI_BUILD_SHARED   OFF )
 set( NANOGUI_BUILD_PYTHON   OFF )
@@ -104,8 +103,10 @@ set( NANOGUI_BUILD_PYTHON   OFF )
 # set( NANOGUI_BUILD_GLFW     ON  ) # default is fine
 set( NANOGUI_INSTALL        OFF )
 add_subdirectory( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui )
+#--------------------------------------------------
 
 
+#--------------------------------------------------
 #----- Bundling on macOS and Windows
 set( OS_BUNDLE_NAME )
 if( BUNDLE_APP )
@@ -117,6 +118,7 @@ if( BUNDLE_APP )
         set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" )
     endif()
 endif()
+#--------------------------------------------------
 
 
 #--------------------------------------------------
@@ -150,6 +152,35 @@ endif()
 
 
 #--------------------------------------------------
+#----- Installing executable
+# The bundle is at the root of the install tree,
+# otherwiese it'll go into the bin directory.
+if( APPLE )
+    install( TARGETS ${EXECUTABLE_NAME}
+        BUNDLE  DESTINATION .   COMPONENT bundle
+        RUNTIME DESTINATION bin COMPONENT runtime )
+else()
+    # install( FILES ${CMAKE_CURRENT_LIST_DIR}/resources/AppIcon.ico DESTINATION . )
+    install( TARGETS ${EXECUTABLE_NAME} DESTINATION . COMPONENT bundle )
+endif()
+
+#----- Installing documentation
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/README.md DESTINATION . RENAME Readme.md COMPONENT docs )
+
+#----- Installing licenses
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/LICENSE DESTINATION . RENAME License.txt COMPONENT licenses )
+
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/fmt/LICENSE.rst                  DESTINATION thirdparty-licenses RENAME fmt.rst          COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/LICENSE.txt              DESTINATION thirdparty-licenses RENAME nanogui.txt      COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/coro/LICENSE         DESTINATION thirdparty-licenses RENAME coro.txt         COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/glfw/LICENSE.md      DESTINATION thirdparty-licenses RENAME glfw.md          COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/nanovg/LICENSE.txt   DESTINATION thirdparty-licenses RENAME nanovg.txt       COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/nanovg_metal/LICENSE DESTINATION thirdparty-licenses RENAME nanovg_metal.txt COMPONENT licenses )
+install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/pybind11/LICENSE     DESTINATION thirdparty-licenses RENAME pybind11.txt     COMPONENT licenses )
+#--------------------------------------------------
+
+
+#--------------------------------------------------
 #----- Bundling paths
 set( APPS "\${CMAKE_INSTALL_PREFIX}/bin/${EXECUTABLE_NAME}" )
 
@@ -157,77 +188,43 @@ if( WIN32 )
     set( APPS "${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.exe" )
 endif( WIN32 )
 
-if( APPLE AND BUNDLE_APP )
-    set( APPS "\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app" )
-endif( APPLE AND BUNDLE_APP )
 #----- Bundling properties on macOS
-if( BUNDLE_APP )
-    if( APPLE )
-        ### Apple bundle resource files
-        # For Apple set the icns file containing icons
-        # set where in the bundle to put the icns file
-        # set_source_files_properties(
-        #     ${CMAKE_CURRENT_LIST_DIR}/resources/AppIcon.icns
-        #     ${CMAKE_CURRENT_LIST_DIR}/resources/Icon.png
-        #     PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
+if( BUNDLE_APP AND APPLE )
+    set( APPS "\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app" )
 
-        ### Apple bundle Info.plist file
-        set_target_properties( ${EXECUTABLE_NAME} PROPERTIES
-            MACOSX_BUNDLE_BUNDLE_NAME    "Nanogui App"
-            MACOSX_BUNDLE_GUI_IDENTIFIER "org.gpmueller.NanoGuiApp"
-            MACOSX_BUNDLE_ICON_FILE      "AppIcon.icns"
-            MACOSX_BUNDLE_INFO_STRING    "Nanogui App"
-            MACOSX_BUNDLE_COPYRIGHT      "© Gideon Müller")
-    endif()
+    ### Apple bundle resource files
+    # For Apple set the icns file containing icons
+    # set where in the bundle to put the icns file
+    # set_source_files_properties(
+    #     ${CMAKE_CURRENT_LIST_DIR}/resources/AppIcon.icns
+    #     ${CMAKE_CURRENT_LIST_DIR}/resources/Icon.png
+    #     PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
+
+    ### Apple bundle Info.plist file
+    set_target_properties( ${EXECUTABLE_NAME} PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME    "Nanogui App"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.gpmueller.NanoGuiApp"
+        MACOSX_BUNDLE_ICON_FILE      "AppIcon.icns"
+        MACOSX_BUNDLE_INFO_STRING    "Nanogui App"
+        MACOSX_BUNDLE_COPYRIGHT      "© Gideon Müller")
 endif()
-#--------------------------------------------------
 
-
-#--------------------------------------------------
-#----- Installing executable
-# The bundle is at the root of the install tree,
-# otherwiese it'll go into the bin directory.
-if( WIN32 )
-    # install( FILES ${CMAKE_CURRENT_LIST_DIR}/resources/AppIcon.ico DESTINATION . )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/LICENSE               DESTINATION . RENAME License.txt )
-
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/fmt/LICENSE.rst                  DESTINATION Licenses RENAME fmt.rst )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/LICENSE.txt              DESTINATION Licenses RENAME nanogui.txt )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/coro/LICENSE         DESTINATION Licenses RENAME coro.txt )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/glfw/LICENSE.md      DESTINATION Licenses RENAME glfw.md )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/nanovg/LICENSE.txt   DESTINATION Licenses RENAME nanovg.txt )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/nanovg_metal/LICENSE DESTINATION Licenses RENAME nanovg_metal.txt )
-    install( FILES ${CMAKE_CURRENT_LIST_DIR}/thirdparty/nanogui/ext/pybind11/LICENSE     DESTINATION Licenses RENAME pybind11.txt )
-
-    install( TARGETS ${EXECUTABLE_NAME} DESTINATION . )
-    install( DIRECTORY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ./ COMPONENT bundle )
-else()
-    install( TARGETS ${EXECUTABLE_NAME}
-        BUNDLE  DESTINATION .   COMPONENT bundle
-        RUNTIME DESTINATION bin COMPONENT runtime )
-endif()
-#--------------------------------------------------
-
-
-#--------------------------------------------------
 #----- Bundle install
-if( BUNDLE_APP )
+if( BUNDLE_APP AND APPLE )
     # Now the work of copying dependencies into the bundle/package
     # The quotes are escaped and variables to use at install time have their $ escaped
     # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 
     ### Need to make the app and binary executable
-    if( APPLE )
-        install( CODE "
-            include(BundleUtilities)
-            fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")
-            " COMPONENT bundle )
+    install( CODE "
+        include(BundleUtilities)
+        fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")
+        " COMPONENT bundle )
 
-        install( CODE "
-            execute_process( COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app\" )
-            execute_process( COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app/Contents/MacOS/${EXECUTABLE_NAME}\" )
-            " COMPONENT bundle )
-    endif()
+    install( CODE "
+        execute_process( COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app\" )
+        execute_process( COMMAND chmod +x \"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app/Contents/MacOS/${EXECUTABLE_NAME}\" )
+        " COMPONENT bundle )
 endif()
 #--------------------------------------------------
 
@@ -246,19 +243,12 @@ if( APPLE  )
     set( CPACK_COMPONENTS_ALL bundle )
 elseif( WIN32 )
     set( CPACK_GENERATOR "ZIP" )
-    set( CPACK_BINARY_DRAGNDROP ON )
     set( CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE )
-    set( CPACK_COMPONENTS_ALL bundle icons )
-    set( CPACK_ARCHIVE_FILE_NAME "nanogui-app-${META_VERSION_MAJOR}.${META_VERSION_MINOR}.${META_VERSION_PATCH}" )
-    if( META_GIT_BRANCH )
-        set( CPACK_ARCHIVE_FILE_NAME "${CPACK_ARCHIVE_FILE_NAME}-${META_GIT_BRANCH}" )
-        # Only attach the revision if it's not the master branch
-        if( META_GIT_REVISION )
-            set( CPACK_ARCHIVE_FILE_NAME "${CPACK_ARCHIVE_FILE_NAME}-${META_GIT_REVISION}" )
-        endif()
-    endif()
-    message( "revision: ${META_VERSION_REVISION}" )
-    message( "name: ${CPACK_ARCHIVE_FILE_NAME}" )
+    set( CPACK_COMPONENTS_ALL bundle icons licenses docs )
+else()
+    set( CPACK_GENERATOR "ZIP" )
+    set( CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE )
+    set( CPACK_COMPONENTS_ALL bundle icons licenses docs )
 endif()
 
 set( CPACK_ARCHIVE_COMPONENT_INSTALL ON )
